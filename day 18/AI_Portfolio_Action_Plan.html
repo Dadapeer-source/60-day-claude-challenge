@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Portfolio Website — Project Planner</title>
+<style>
+  :root{
+    --graphite: #20231f;
+    --graphite-soft: #2a2e27;
+    --paper: #f3efe4;
+    --paper-dim: #d9d3c0;
+    --rule: #4a4f43;
+    --moss: #7fa066;
+    --moss-bright: #a4c98a;
+    --rust: #c4663f;
+    --amber: #d9a441;
+    --ink-muted: #9a9484;
+    --done: #6f8f5c;
+    --pending: #c4663f;
+    --waiting: #d9a441;
+    --radius: 3px;
+    --mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --display: 'Fraunces', 'Georgia', serif;
+    --body: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+
+  body{
+    background: var(--graphite);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(243,239,228,0.025) 0px, rgba(243,239,228,0.025) 1px, transparent 1px, transparent 28px);
+    color: var(--paper);
+    font-family: var(--body);
+    line-height: 1.55;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  .wrap{
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 48px 28px 90px;
+  }
+
+  /* ===== Header / Title block ===== */
+  .masthead{
+    display:flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    border-bottom: 2px solid var(--paper);
+    padding-bottom: 22px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+  .masthead-left{flex:1;min-width:260px;}
+  .eyebrow{
+    font-family: var(--mono);
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--moss-bright);
+    margin: 0 0 10px;
+  }
+  h1{
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: clamp(32px, 5vw, 46px);
+    margin: 0;
+    letter-spacing: -0.01em;
+    color: var(--paper);
+  }
+  .subtitle{
+    font-family: var(--body);
+    color: var(--ink-muted);
+    font-size: 15px;
+    margin-top: 8px;
+    max-width: 540px;
+  }
+  .meta-block{
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--paper-dim);
+    text-align: right;
+    line-height: 1.9;
+    white-space: nowrap;
+  }
+  .meta-block .priority-tag{
+    display:inline-block;
+    background: var(--rust);
+    color: var(--graphite);
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: var(--radius);
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+  }
+
+  /* ===== Section scaffolding ===== */
+  section{
+    margin-top: 46px;
+  }
+  .sec-head{
+    display:flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .sec-num{
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--moss-bright);
+    border: 1px solid var(--rule);
+    padding: 2px 7px;
+    border-radius: var(--radius);
+  }
+  .sec-title{
+    font-family: var(--display);
+    font-size: 23px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--paper);
+  }
+  .sec-rule{
+    flex:1;
+    height: 1px;
+    background: var(--rule);
+    transform: translateY(-4px);
+  }
+
+  /* ===== Summary ===== */
+  .summary-card{
+    background: var(--graphite-soft);
+    border-left: 3px solid var(--moss-bright);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    font-size: 16px;
+    color: var(--paper);
+  }
+  .summary-card p{margin: 0 0 12px;}
+  .summary-card p:last-child{margin-bottom:0;}
+
+  /* ===== Key Takeaways ===== */
+  .takeaways{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .takeaway{
+    background: var(--graphite-soft);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    border: 1px solid var(--rule);
+    font-size: 14.5px;
+  }
+  .takeaway b{color: var(--moss-bright); font-weight: 600;}
+
+  /* ===== Action Items table ===== */
+  .filter-row{
+    display:flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .filter-btn{
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--paper-dim);
+    padding: 6px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .filter-btn:hover{ border-color: var(--moss-bright); color: var(--paper); }
+  .filter-btn.active{
+    background: var(--moss-bright);
+    border-color: var(--moss-bright);
+    color: var(--graphite);
+    font-weight: 700;
+  }
+
+  .action-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+  .action-table thead th{
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    border-bottom: 1px solid var(--rule);
+    padding: 0 10px 10px;
+  }
+  .action-table tbody tr{
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: opacity 0.2s ease;
+  }
+  .action-table tbody tr.hidden{ display:none; }
+  .action-table td{
+    padding: 13px 10px;
+    vertical-align: top;
+  }
+  .check-cell{ width: 30px; }
+  .checkbox{
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--ink-muted);
+    border-radius: 3px;
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    background: transparent;
+  }
+  .checkbox.checked{
+    background: var(--done);
+    border-color: var(--done);
+  }
+  .checkbox.checked::after{
+    content: "✓";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--graphite);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .task-cell .task-text{ color: var(--paper); }
+  .task-cell.done .task-text{
+    color: var(--ink-muted);
+    text-decoration: line-through;
+  }
+  .owner-tag{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--moss-bright);
+  }
+  .owner-tag.unassigned{ color: var(--ink-muted); font-style: italic; }
+  .due-tag{
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--paper-dim);
+  }
+  .status-pill{
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .status-pill.todo{ background: rgba(196,102,63,0.18); color: var(--rust); border: 1px solid rgba(196,102,63,0.4); }
+  .status-pill.done{ background: rgba(111,143,92,0.18); color: var(--moss-bright); border: 1px solid rgba(111,143,92,0.4); }
+  .status-pill.waiting{ background: rgba(217,164,65,0.18); color: var(--amber); border: 1px solid rgba(217,164,65,0.4); }
+
+  .progress-track{
+    margin-top: 16px;
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-muted);
+  }
+  .progress-bar{
+    flex:1;
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill{
+    height: 100%;
+    background: linear-gradient(90deg, var(--moss), var(--moss-bright));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  /* ===== Open Questions ===== */
+  .qa-list{ display:flex; flex-direction: column; gap: 10px; }
+  .qa-item{
+    background: var(--graphite-soft);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    display:flex;
+    gap: 12px;
+    align-items: flex-start;
+    font-size: 14.5px;
+  }
+  .qa-mark{
+    font-family: var(--display);
+    font-size: 20px;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  /* ===== Risks / Blockers ===== */
+  .risk-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .risk-card{
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    border: 1px solid var(--rule);
+    background: var(--graphite-soft);
+  }
+  .risk-card .tag{
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .risk-card.risk .tag{ background: rgba(217,164,65,0.18); color: var(--amber); }
+  .risk-card.blocker .tag{ background: rgba(196,102,63,0.18); color: var(--rust); }
+  .risk-card p{ margin: 0; font-size: 14.5px; }
+
+  /* ===== Conflicts ===== */
+  .empty-state{
+    font-family: var(--mono);
+    font-size: 13.5px;
+    color: var(--ink-muted);
+    border: 1px dashed var(--rule);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+
+  /* ===== Additional Notes ===== */
+  .notes-list{
+    list-style: none;
+    margin: 0; padding: 0;
+    display:flex; flex-direction: column; gap: 9px;
+  }
+  .notes-list li{
+    font-size: 14.5px;
+    padding-left: 18px;
+    position: relative;
+    color: var(--paper-dim);
+  }
+  .notes-list li::before{
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: var(--moss-bright);
+  }
+
+  footer{
+    margin-top: 56px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-muted);
+    display:flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  @media (max-width: 700px){
+    .wrap{ padding: 32px 18px 70px; }
+    .masthead{ flex-direction: column; align-items: flex-start; }
+    .meta-block{ text-align: left; }
+    .takeaways{ grid-template-columns: 1fr; }
+    .risk-grid{ grid-template-columns: 1fr; }
+    .action-table thead{ display:none; }
+    .action-table tbody tr{ display:block; border:1px solid var(--rule); border-radius: var(--radius); margin-bottom: 10px; padding: 10px; }
+    .action-table td{ display:block; padding: 4px 4px; }
+    .check-cell{ display:flex; align-items:center; gap:10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="masthead-left">
+      <p class="eyebrow">Brain Dump → Action Plan</p>
+      <h1>AI Portfolio Website</h1>
+      <p class="subtitle">Structured plan generated from raw project notes — actions, owners, open questions, and risks in one view.</p>
+    </div>
+    <div class="meta-block">
+      LOG DATE — Not specified<br>
+      TEAM — Dadapeer, Rahul, Priya<br>
+      NEXT REVIEW — Friday, 3:00 PM<br>
+      <span class="priority-tag">PRIORITY: SHIP BY MONTH-END</span>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <section id="summary">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2 class="sec-title">Summary</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="summary-card">
+      <p>The team is building a personal portfolio website for Dadapeer using React on the frontend and FastAPI on the backend. Rahul has finished the responsive navigation menu, and the homepage is due June 22. Remaining content work includes a Projects section with GitHub links, certifications, internship details, mobile optimization, and an updated resume PDF. Several external dependencies are still open: the final logo design, the LinkedIn banner, and the domain purchase. Two decisions are still unresolved — the hosting platform (Vercel vs. GitHub Pages) and the contact form service (EmailJS vs. Formspree). Priya will review content before deployment, and the next check-in is scheduled for Friday at 3:00 PM, with the stated priority of completing deployment before the end of the month.</p>
+    </div>
+  </section>
+
+  <!-- KEY TAKEAWAYS -->
+  <section id="takeaways">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2 class="sec-title">Key Takeaways</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="takeaways">
+      <div class="takeaway"><b>Tech stack is decided.</b> React for frontend, FastAPI for backend — no longer open for debate.</div>
+      <div class="takeaway"><b>One major task is done.</b> Rahul completed the responsive navigation menu.</div>
+      <div class="takeaway"><b>Homepage deadline is fixed.</b> Dadapeer is targeting June 22 for the homepage.</div>
+      <div class="takeaway"><b>Launch depends on outside parties.</b> Logo and LinkedIn banner are with an external designer, not the team.</div>
+      <div class="takeaway"><b>Two decisions still pending.</b> Hosting platform and contact form tool are unresolved.</div>
+      <div class="takeaway"><b>Overall priority is clear.</b> Finish deployment before the end of the month.</div>
+    </div>
+  </section>
+
+  <!-- ACTION ITEMS -->
+  <section id="actions">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2 class="sec-title">Action Items</h2>
+      <div class="sec-rule"></div>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="todo">To do</button>
+      <button class="filter-btn" data-filter="waiting">Waiting</button>
+      <button class="filter-btn" data-filter="done">Done</button>
+    </div>
+
+    <table class="action-table" id="actionTable">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Task</th>
+          <th>Owner</th>
+          <th>Due</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+
+    <div class="progress-track">
+      <span id="progressLabel">0 / 0 complete</span>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </section>
+
+  <!-- OPEN QUESTIONS -->
+  <section id="questions">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2 class="sec-title">Open Questions</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="qa-list">
+      <div class="qa-item"><span class="qa-mark">?</span><span>Should the website be deployed on Vercel or GitHub Pages?</span></div>
+      <div class="qa-item"><span class="qa-mark">?</span><span>Should the contact form use EmailJS or Formspree?</span></div>
+    </div>
+  </section>
+
+  <!-- RISKS / BLOCKERS -->
+  <section id="risks">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2 class="sec-title">Risks / Blockers</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="risk-grid">
+      <div class="risk-card risk">
+        <span class="tag">Risk</span>
+        <p>Delay in logo delivery could postpone the website launch.</p>
+      </div>
+      <div class="risk-card blocker">
+        <span class="tag">Blocker</span>
+        <p>Domain name has not been purchased yet.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFLICTS -->
+  <section id="conflicts">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2 class="sec-title">Conflicts</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <div class="empty-state">No conflicting statements found in the notes.</div>
+  </section>
+
+  <!-- ADDITIONAL NOTES -->
+  <section id="notes">
+    <div class="sec-head">
+      <span class="sec-num">07</span>
+      <h2 class="sec-title">Additional Notes</h2>
+      <div class="sec-rule"></div>
+    </div>
+    <ul class="notes-list">
+      <li>BCA final semester results are expected next month — not specified whether this affects the project timeline.</li>
+      <li>Python project screenshots are planned to be collected this weekend, for use in the Projects section.</li>
+      <li>GitHub README files need improvement — not specified which repositories.</li>
+      <li>Specific deadline for end-of-month launch is not specified beyond "before the end of the month."</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated from brain dump notes — no information invented beyond what was provided.</span>
+    <span>Status legend: <span style="color:var(--rust)">To do</span> · <span style="color:var(--amber)">Waiting</span> · <span style="color:var(--moss-bright)">Done</span></span>
+  </footer>
+
+</div>
+
+<script>
+  const tasks = [
+    { text: "Complete the portfolio homepage", owner: "Dadapeer", due: "Jun 22", status: "todo" },
+    { text: "Add a Projects section with GitHub links", owner: "Not specified", due: "Not specified", status: "todo" },
+    { text: "Include certifications and internship details", owner: "Not specified", due: "Not specified", status: "todo" },
+    { text: "Optimize the website for mobile devices", owner: "Not specified", due: "Not specified", status: "todo" },
+    { text: "Update resume PDF before publishing", owner: "Not specified", due: "Before publishing", status: "todo" },
+    { text: "Collect Python project screenshots", owner: "Not specified", due: "This weekend", status: "todo" },
+    { text: "Improve GitHub README files", owner: "Not specified", due: "Not specified", status: "todo" },
+    { text: "Review content before deployment", owner: "Priya", due: "Before deployment", status: "todo" },
+    { text: "Purchase domain name", owner: "Not specified", due: "Not specified", status: "todo" },
+    { text: "Receive final logo design from designer", owner: "Designer", due: "Not specified", status: "waiting" },
+    { text: "Receive LinkedIn banner design", owner: "Designer", due: "Not specified", status: "waiting" },
+    { text: "Complete responsive navigation menu", owner: "Rahul", due: "Not specified", status: "done" },
+  ];
+
+  const tbody = document.querySelector("#actionTable tbody");
+  const progressLabel = document.getElementById("progressLabel");
+  const progressFill = document.getElementById("progressFill");
+
+  function statusLabel(s){
+    if(s === "todo") return "To do";
+    if(s === "waiting") return "Waiting";
+    return "Done";
+  }
+
+  function renderRows(){
+    tbody.innerHTML = "";
+    tasks.forEach((t, i) => {
+      const tr = document.createElement("tr");
+      tr.dataset.status = t.status;
+      tr.innerHTML = `
+        <td class="check-cell">
+          <span class="checkbox ${t.status === 'done' ? 'checked' : ''}" data-idx="${i}"></span>
+        </td>
+        <td class="task-cell ${t.status === 'done' ? 'done' : ''}"><span class="task-text">${t.text}</span></td>
+        <td><span class="owner-tag ${t.owner === 'Not specified' ? 'unassigned' : ''}">${t.owner}</span></td>
+        <td><span class="due-tag">${t.due}</span></td>
+        <td><span class="status-pill ${t.status}">${statusLabel(t.status)}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    attachCheckboxHandlers();
+    updateProgress();
+  }
+
+  function attachCheckboxHandlers(){
+    document.querySelectorAll(".checkbox").forEach(box => {
+      box.addEventListener("click", () => {
+        const idx = parseInt(box.dataset.idx, 10);
+        tasks[idx].status = tasks[idx].status === "done" ? "todo" : "done";
+        renderRows();
+        applyFilter(currentFilter);
+      });
+    });
+  }
+
+  function updateProgress(){
+    const done = tasks.filter(t => t.status === "done").length;
+    progressLabel.textContent = `${done} / ${tasks.length} complete`;
+    progressFill.style.width = `${(done / tasks.length) * 100}%`;
+  }
+
+  let currentFilter = "all";
+  function applyFilter(filter){
+    currentFilter = filter;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b.dataset.filter === filter));
+    document.querySelectorAll("#actionTable tbody tr").forEach(tr => {
+      tr.classList.toggle("hidden", filter !== "all" && tr.dataset.status !== filter);
+    });
+  }
+
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => applyFilter(btn.dataset.filter));
+  });
+
+  renderRows();
+</script>
+</body>
+</html>
