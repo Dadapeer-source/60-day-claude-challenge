@@ -1,28 +1,8 @@
 # Day 21 – Digital Privacy Intelligence Dashboard
 
-## Objective
+## Overview
 
-Built an interactive Digital Privacy Intelligence Dashboard using AI-generated HTML to visualize a user's digital footprint and privacy exposure.
-
-## Dataset Used
-
-The dashboard analyzed the following services:
-
-- Instagram
-- Snapchat
-- TikTok
-- YouTube
-- Discord
-- WhatsApp
-- iMessage
-- Spotify
-- Roblox
-- PUBG Mobile
-- Amazon
-- Meesho
-- Google Search
-- Google Pay
-- Google Photos
+Today I built a Digital Privacy Intelligence Dashboard using AI-generated HTML. The dashboard analyzes a sample digital footprint and presents privacy-related insights through an interactive interface.
 
 ## Features
 
@@ -34,21 +14,23 @@ The dashboard analyzed the following services:
 - Risk Radar
 - Digital Twin Profile
 - Most Valuable Data Assets
-- Privacy Improvement Plan
+- Privacy Improvement Simulator
+- Final Verdict
 
 ## Key Learnings
 
-- Many online services contribute to a user's digital footprint.
-- AI can organize complex privacy information into a visual dashboard.
-- Facts and estimates should always be clearly separated.
-- Privacy awareness helps users make better decisions about the platforms they use.
+- AI can generate rich and interactive dashboards from structured prompts.
+- Digital privacy can be visualized using charts, rankings, and risk analysis.
+- It is important to distinguish between confirmed facts and estimated insights.
+- Understanding online exposure helps users make informed privacy decisions.
 
-## Files Included
+## Technologies Used
 
-- `digital_privacy_dashboard.html`
-- Dashboard screenshots
-- `day21.md`
+- HTML
+- CSS
+- JavaScript
+- Claude AI
 
-## Conclusion
+## Outcome
 
-This exercise demonstrated how AI can be used to create interactive dashboards for understanding digital privacy risks and online exposure while avoiding unsupported claims.
+Successfully generated and tested an interactive privacy dashboard demonstrating modern UI design and data visualization concepts.
