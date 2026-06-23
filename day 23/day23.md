@@ -1,13 +1,19 @@
 # Day 23 – Customer & MVP Blueprint
 
-## What I Learned
-- Identified the Ideal Customer Profile (ICP).
-- Created a Buyer Persona.
-- Analyzed customer pain points and journey.
-- Prioritized MVP features using the MoSCoW framework.
-- Explored pricing ideas and key business risks.
-- Built a 30-day MVP action plan.
-- Generated a founder action sheet with next steps.
+## Overview
+Created a Customer & MVP Blueprint for an AI Portfolio Builder platform targeting students and fresh graduates.
+
+## Key Learnings
+- Defined the Ideal Customer Profile (ICP)
+- Built detailed Buyer Personas
+- Identified the Top 10 Customer Pain Points
+- Mapped the Customer Journey
+- Analyzed Buying Triggers and Objections
+- Prioritized MVP features using the MoSCoW framework
+- Proposed a Pricing Hypothesis
+- Evaluated Top 5 Business Risks
+- Prepared a 30-Day MVP Plan
+- Created a Founder Action Sheet with next steps
 
 ## Outcome
-Created an AI-assisted Customer & MVP Blueprint to better understand users and define the first version of a startup product.
+Generated a professional Customer & MVP Blueprint report and documented the strategy with supporting screenshots and PDF.
