@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Shark Tank Simulator</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+padding:20px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+margin-bottom:20px;
+font-size:42px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+box-shadow:0 0 15px rgba(0,0,0,.3);
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:15px;
+}
+
+input,textarea{
+width:100%;
+padding:12px;
+margin-top:6px;
+margin-bottom:15px;
+border:none;
+border-radius:8px;
+background:#334155;
+color:white;
+}
+
+button{
+padding:12px 20px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+transition:.3s;
+}
+
+button:hover{
+background:#1d4ed8;
+}
+
+.judge{
+border-left:5px solid #38bdf8;
+padding:15px;
+margin-top:15px;
+background:#0f172a;
+border-radius:8px;
+}
+
+.score{
+font-size:24px;
+font-weight:bold;
+color:#22c55e;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+th,td{
+border:1px solid #475569;
+padding:10px;
+text-align:center;
+}
+
+#result{
+display:none;
+}
+
+@media(max-width:700px){
+h1{
+font-size:30px;
+}
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🦈 AI Shark Tank Simulator</h1>
+
+<div class="card">
+
+<h2>Startup Pitch</h2>
+
+<label>Startup Name</label>
+<input id="name">
+
+<label>Problem Statement</label>
+<textarea id="problem"></textarea>
+
+<label>Solution</label>
+<textarea id="solution"></textarea>
+
+<label>Revenue Model</label>
+<input id="revenue">
+
+<label>Target Audience</label>
+<input id="audience">
+
+<label>Funding Ask</label>
+<input id="funding">
+
+<button onclick="startPitch()">
+Start Shark Tank
+</button>
+
+</div>
+
+<div id="pitchArea"></div>
+
+<div id="result" class="card">
+
+<h2>Investment Report</h2>
+
+<div id="scores"></div>
+
+<br>
+
+<h3 id="decision"></h3>
+
+<br>
+
+<div id="valuation"></div>
+
+</div>
+
+</div>
+
+<script>
+
+const judges=[
+{
+name:"🦈 Venture Capitalist",
+focus:"Market Size",
+questions:[
+"How will you scale globally?",
+"What makes this market large?"
+]
+},
+{
+name:"🦈 Founder",
+focus:"Execution",
+questions:[
+"Why are you the right person?",
+"What is your roadmap?"
+]
+},
+{
+name:"🦈 Customer",
+focus:"Usefulness",
+questions:[
+"Why would users choose this?",
+"What pain point is solved?"
+]
+},
+{
+name:"🦈 Angel Investor",
+focus:"Profitability",
+questions:[
+"When do you become profitable?",
+"What are your margins?"
+]
+}
+];
+
+function startPitch(){
+
+const area=document.getElementById("pitchArea");
+
+area.innerHTML="";
+
+judges.forEach(j=>{
+
+let html=`
+<div class="judge">
+
+<h3>${j.name}</h3>
+
+<p><b>Focus:</b> ${j.focus}</p>
+
+<p>${j.questions[0]}</p>
+
+<textarea></textarea>
+
+<p>${j.questions[1]}</p>
+
+<textarea></textarea>
+
+</div>
+`;
+
+area.innerHTML+=html;
+
+});
+
+area.innerHTML+=`
+<br>
+<button onclick="evaluateStartup()">
+Evaluate Startup
+</button>
+`;
+
+}
+
+function rand(a,b){
+return Math.floor(Math.random()*(b-a+1))+a;
+}
+
+function evaluateStartup(){
+
+let market=rand(65,98);
+let innovation=rand(60,97);
+let business=rand(60,96);
+let execution=rand(55,95);
+let investment=rand(60,98);
+
+document.getElementById("result").style.display="block";
+
+document.getElementById("scores").innerHTML=`
+
+<table>
+
+<tr>
+
+<th>Metric</th>
+
+<th>Score</th>
+
+</tr>
+
+<tr>
+
+<td>Market Potential</td>
+
+<td class="score">${market}</td>
+
+</tr>
+
+<tr>
+
+<td>Innovation</td>
+
+<td class="score">${innovation}</td>
+
+</tr>
+
+<tr>
+
+<td>Business Model</td>
+
+<td class="score">${business}</td>
+
+</tr>
+
+<tr>
+
+<td>Execution</td>
+
+<td class="score">${execution}</td>
+
+</tr>
+
+<tr>
+
+<td>Investment Worthiness</td>
+
+<td class="score">${investment}</td>
+
+</tr>
+
+</table>
+
+`;
+
+const avg=Math.round((market+innovation+business+execution+investment)/5);
+
+let decision="";
+let valuation="";
+let funding="";
+
+if(avg>=85){
+
+decision="🟢 INVEST";
+
+valuation="$10M";
+
+funding="$1M";
+
+}
+
+else if(avg>=70){
+
+decision="🟡 COME BACK LATER";
+
+valuation="$5M";
+
+funding="$300K";
+
+}
+
+else if(avg>=55){
+
+decision="🟠 ACQUIRE";
+
+valuation="$2M";
+
+funding="$0";
+
+}
+
+else{
+
+decision="🔴 REJECT";
+
+valuation="N/A";
+
+funding="$0";
+
+}
+
+document.getElementById("decision").innerHTML=decision;
+
+document.getElementById("valuation").innerHTML=`
+<h3>Suggested Valuation: ${valuation}</h3>
+
+<h3>Funding Recommendation: ${funding}</h3>
+
+<p>
+Decision generated from combined AI judge scoring across market potential,
+innovation, execution capability, business model strength and investment
+worthiness.
+</p>
+`;
+
+}
+
+// ---------- Confetti ----------
+function launchConfetti() {
+  for (let i = 0; i < 120; i++) {
+    const c = document.createElement("div");
+    c.style.position = "fixed";
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.top = "-10px";
+    c.style.width = "8px";
+    c.style.height = "8px";
+    c.style.borderRadius = "50%";
+    c.style.background =
+      ["#22c55e","#3b82f6","#f59e0b","#ef4444","#a855f7"][Math.floor(Math.random()*5)];
+    c.style.zIndex = "9999";
+    c.style.transition = "transform 3s linear, opacity 3s linear";
+    document.body.appendChild(c);
+
+    requestAnimationFrame(() => {
+      c.style.transform =
+        `translate(${(Math.random()-0.5)*300}px, ${window.innerHeight+100}px)`;
+      c.style.opacity = "0";
+    });
+
+    setTimeout(() => c.remove(), 3000);
+  }
+}
+
+// ---------- Leaderboard ----------
+function saveLeaderboard(avgScore) {
+  const board = JSON.parse(localStorage.getItem("sharkLeaderboard") || "[]");
+
+  board.push({
+    startup: document.getElementById("name").value || "Untitled Startup",
+    score: avgScore,
+    date: new Date().toLocaleDateString()
+  });
+
+  board.sort((a,b)=>b.score-a.score);
+
+  localStorage.setItem(
+    "sharkLeaderboard",
+    JSON.stringify(board.slice(0,5))
+  );
+}
+
+function renderLeaderboard() {
+  const board = JSON.parse(localStorage.getItem("sharkLeaderboard") || "[]");
+
+  let html = `
+    <div class="card">
+      <h2>🏆 Leaderboard</h2>
+      <table>
+        <tr>
+          <th>Startup</th>
+          <th>Score</th>
+          <th>Date</th>
+        </tr>
+  `;
+
+  board.forEach(item=>{
+    html += `
+      <tr>
+        <td>${item.startup}</td>
+        <td>${item.score}</td>
+        <td>${item.date}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table></div>`;
+
+  document.getElementById("pitchArea").insertAdjacentHTML("beforeend", html);
+}
+
+// ---------- Download Report ----------
+function downloadReport() {
+  const report = `
+AI Shark Tank Report
+
+Startup:
+${document.getElementById("name").value}
+
+Problem:
+${document.getElementById("problem").value}
+
+Solution:
+${document.getElementById("solution").value}
+
+Revenue:
+${document.getElementById("revenue").value}
+
+Audience:
+${document.getElementById("audience").value}
+
+Funding Ask:
+${document.getElementById("funding").value}
+
+Decision:
+${document.getElementById("decision").innerText}
+`;
+
+  const blob = new Blob([report], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "Pitch_Report.txt";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+// ---------- Share ----------
+function shareResult() {
+  const text =
+    "I just pitched my startup in an AI Shark Tank Simulator! 🦈";
+
+  if (navigator.share) {
+    navigator.share({
+      title: "AI Shark Tank",
+      text
+    });
+  } else {
+    navigator.clipboard.writeText(text);
+    alert("Share text copied to clipboard!");
+  }
+}
+
+saveLeaderboard(avg);
+
+if (avg >= 85) {
+  launchConfetti();
+}
+
+document.getElementById("valuation").innerHTML += `
+<br><br>
+<button onclick="downloadReport()">📄 Download Report</button>
+<button onclick="shareResult()">🔗 Share Result</button>
+`;
+
+renderLeaderboard();
+
+</script>
+
+</body>
+</html>
