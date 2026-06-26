@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Prior Authorization Workflow Simulator</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#eaf4ff;
+    color:#000;
+}
+
+header{
+    background:#1565c0;
+    color:white;
+    padding:15px;
+    text-align:center;
+}
+
+#topBar{
+    display:flex;
+    justify-content:space-around;
+    background:#90caf9;
+    padding:10px;
+    font-weight:bold;
+}
+
+.container{
+    padding:20px;
+}
+
+button{
+    background:#1976d2;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+    margin:5px;
+}
+
+button:hover{
+    background:#0d47a1;
+}
+
+.lanes{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.lane{
+    flex:1;
+    min-width:250px;
+    background:white;
+    border:2px solid #64b5f6;
+    border-radius:12px;
+    padding:10px;
+    min-height:320px;
+}
+
+.lane h2{
+    text-align:center;
+    color:#0d47a1;
+}
+
+.card{
+    background:#bbdefb;
+    padding:12px;
+    margin:10px 0;
+    border-radius:8px;
+    cursor:grab;
+}
+
+.dropzone{
+    border:2px dashed #1976d2;
+    min-height:80px;
+    padding:10px;
+    border-radius:8px;
+}
+
+#explanation{
+    margin-top:20px;
+    background:#fff;
+    padding:15px;
+    border-left:6px solid #1976d2;
+}
+
+#summary{
+    display:none;
+    margin-top:20px;
+    background:white;
+    padding:20px;
+    border-radius:12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🏥 Prior Authorization Workflow Simulator</h1>
+</header>
+
+<div id="topBar">
+<div>Progress: <span id="progress">0%</span></div>
+<div>Days: <span id="days">0</span></div>
+<div>Efficiency: <span id="efficiency">100</span></div>
+</div>
+
+<div class="container">
+
+<h3>Select Patient Scenario</h3>
+
+<select id="scenarioSelect"></select>
+
+<button onclick="startCase()">Start New Patient</button>
+
+<div class="lanes">
+
+<div class="lane">
+<h2>👤 Patient</h2>
+<div id="patientLane" class="dropzone"
+ondrop="drop(event)"
+ondragover="allowDrop(event)">
+</div>
+</div>
+
+<div class="lane">
+<h2>🏥 Provider</h2>
+<div id="providerLane" class="dropzone"
+ondrop="drop(event)"
+ondragover="allowDrop(event)">
+</div>
+</div>
+
+<div class="lane">
+<h2>🏢 Payer</h2>
+<div id="payerLane" class="dropzone"
+ondrop="drop(event)"
+ondragover="allowDrop(event)">
+</div>
+</div>
+
+</div>
+
+<div id="explanation">
+<b>Educational Step:</b>
+<div id="stepText">
+Choose a patient scenario and begin the Prior Authorization workflow.
+</div>
+</div>
+
+<div id="summary">
+<h2>Workflow Complete 🎉</h2>
+<p id="summaryText"></p>
+
+<button onclick="restartWorkflow()">
+Restart
+</button>
+</div>
+
+</div>
+
+<script>
+
+/* -----------------------
+Editable Scenario Data
+------------------------*/
+
+const scenarios=[
+{
+name:"MRI Scan",
+necessity:"Check chronic back pain",
+outcome:"Approval"
+},
+{
+name:"Elective Surgery",
+necessity:"Knee replacement",
+outcome:"Pend"
+},
+{
+name:"Specialty Medication",
+necessity:"Biologic therapy",
+outcome:"Approval"
+},
+{
+name:"Inpatient Admission",
+necessity:"Emergency stabilization",
+outcome:"Denial"
+}
+];
+
+let progress=0;
+let days=0;
+let efficiency=100;
+let dragged=null;
+
+const select=document.getElementById("scenarioSelect");
+
+scenarios.forEach((s,i)=>{
+let op=document.createElement("option");
+op.value=i;
+op.textContent=s.name;
+select.appendChild(op);
+});
+
+function updateStats() {
+    document.getElementById("progress").textContent = progress + "%";
+    document.getElementById("days").textContent = days;
+    document.getElementById("efficiency").textContent = efficiency;
+}
+
+function startCase() {
+
+    progress = 10;
+    days = 1;
+    efficiency = 100;
+
+    updateStats();
+
+    document.getElementById("summary").style.display = "none";
+
+    document.getElementById("patientLane").innerHTML = "";
+    document.getElementById("providerLane").innerHTML = "";
+    document.getElementById("payerLane").innerHTML = "";
+
+    const idx = select.value;
+    const scenario = scenarios[idx];
+
+    document.getElementById("stepText").innerHTML =
+        "<b>Patient Selected:</b> " +
+        scenario.name +
+        "<br><br>Medical Necessity: " +
+        scenario.necessity +
+        "<br><br>Drag the patient case to the Provider lane.";
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.id = "caseCard";
+    card.draggable = true;
+
+    card.innerHTML =
+        "<b>" + scenario.name + "</b><br>" +
+        "Status: Patient Intake";
+
+    card.addEventListener("dragstart", drag);
+
+    document.getElementById("patientLane").appendChild(card);
+}
+
+function allowDrop(ev) {
+    ev.preventDefault();
+}
+
+function drag(ev) {
+    dragged = ev.target;
+}
+
+function drop(ev) {
+
+    ev.preventDefault();
+
+    if (!dragged) return;
+
+    ev.currentTarget.appendChild(dragged);
+
+    const zone = ev.currentTarget.id;
+    const scenario = scenarios[select.value];
+
+    if (zone === "providerLane") {
+
+        progress = 40;
+        days += 2;
+        efficiency -= 5;
+
+        dragged.innerHTML =
+            "<b>" + scenario.name + "</b><br>" +
+            "Status: Documents Collected";
+
+        document.getElementById("stepText").innerHTML =
+            "<b>Provider Stage</b><br><br>" +
+            "The provider reviews medical necessity, gathers clinical notes, imaging reports, and completes the Prior Authorization request. Now drag the case to the Payer lane.";
+
+    } else if (zone === "payerLane") {
+
+        progress = 80;
+        days += 3;
+        efficiency -= 5;
+
+        let outcome = scenario.outcome;
+
+        let explanation = "";
+
+        if (outcome === "Approval") {
+            explanation =
+                "✅ Approved: Medical necessity criteria were satisfied.";
+        }
+
+        if (outcome === "Pend") {
+            explanation =
+                "🟡 Pending: Additional documentation requested before final review.";
+        }
+
+        if (outcome === "Denial") {
+            explanation =
+                "❌ Denied: Criteria not met. Appeal or Peer-to-Peer Review may be required.";
+        }
+
+        dragged.innerHTML =
+            "<b>" + scenario.name + "</b><br>" +
+            "Decision: " + outcome;
+
+        document.getElementById("stepText").innerHTML =
+            "<b>Payer Review</b><br><br>" +
+            explanation;
+
+        progress = 100;
+
+        updateStats();
+
+        setTimeout(() => {
+
+            document.getElementById("summary").style.display = "block";
+
+            document.getElementById("summaryText").innerHTML =
+                "<b>Scenario:</b> " + scenario.name +
+                "<br><b>Outcome:</b> " + outcome +
+                "<br><b>Total Days:</b> " + days +
+                "<br><b>Efficiency Score:</b> " + efficiency +
+                "<br><br>Workflow simulation completed successfully.";
+
+        }, 600);
+
+        return;
+    }
+
+    updateStats();
+}
+
+function restartWorkflow() {
+
+    progress = 0;
+    days = 0;
+    efficiency = 100;
+
+    updateStats();
+
+    document.getElementById("patientLane").innerHTML = "";
+    document.getElementById("providerLane").innerHTML = "";
+    document.getElementById("payerLane").innerHTML = "";
+
+    document.getElementById("summary").style.display = "none";
+
+    document.getElementById("stepText").innerHTML =
+        "Choose a patient scenario and begin the Prior Authorization workflow.";
+
+    dragged = null;
+}
+
+updateStats();
+
+</script>
+
+</body>
+</html>
