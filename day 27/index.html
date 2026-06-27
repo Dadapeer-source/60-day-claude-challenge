@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Prior Authorization Story Simulator</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+
+body{
+background:#eef6ff;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+#chat{
+height:500px;
+overflow-y:auto;
+scroll-behavior:smooth;
+}
+
+.chatBubble{
+max-width:75%;
+padding:12px;
+margin:10px;
+border-radius:18px;
+box-shadow:0 2px 6px rgba(0,0,0,.15);
+animation:fade .35s ease;
+}
+
+.rahul{
+background:#bfdbfe;
+margin-right:auto;
+}
+
+.priya{
+background:#bbf7d0;
+margin-left:auto;
+}
+
+.centerText{
+text-align:center;
+font-style:italic;
+margin:18px;
+color:#555;
+animation:fade .4s;
+}
+
+.choiceBtn{
+background:#2563eb;
+color:white;
+padding:12px 20px;
+border-radius:10px;
+margin:8px;
+transition:.25s;
+}
+
+.choiceBtn:hover{
+background:#1d4ed8;
+}
+
+.progressOuter{
+height:20px;
+background:#dbeafe;
+border-radius:30px;
+overflow:hidden;
+}
+
+.progressInner{
+height:100%;
+width:0%;
+background:#2563eb;
+transition:1s;
+}
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(20px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="max-w-5xl mx-auto mt-6 bg-white rounded-xl shadow-lg">
+
+<div class="bg-blue-700 text-white p-5 rounded-t-xl">
+
+<h1 class="text-3xl font-bold">
+
+🏥 Prior Authorization Story Simulator
+
+</h1>
+
+<p class="mt-2">
+
+Interactive Healthcare Learning Journey
+
+</p>
+
+</div>
+
+<div class="p-5">
+
+<div class="progressOuter">
+
+<div
+id="progressBar"
+class="progressInner">
+</div>
+
+</div>
+
+<p
+class="mt-2 text-center font-bold"
+id="progressLabel">
+
+0% Complete
+
+</p>
+
+<div
+id="chat"
+class="mt-6 border rounded-lg p-4 bg-slate-50">
+
+</div>
+
+<div
+id="choices"
+class="mt-4 text-center">
+
+</div>
+
+<div class="text-center mt-6">
+
+<button
+onclick="restartStory()"
+class="bg-red-500 text-white px-6 py-3 rounded-lg">
+
+Restart Story
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* =========================
+
+Editable Story Data
+
+========================= */
+
+const scenes=[
+
+{
+title:"Doctor Visit",
+
+progress:12,
+
+doctor:"Dr. Patel examines Rahul at City Medical Center and diagnoses Rheumatoid Arthritis.",
+
+rahul:"My joints hurt every day. I hope there's a treatment.",
+
+priya:"The doctor recommends Humira because it can help control inflammation early.",
+
+choices:[
+"Ask why Humira was prescribed",
+"Continue"
+]
+
+},
+
+{
+title:"Insurance Roadblock",
+
+progress:25,
+
+doctor:"Provider submits a Prior Authorization request directly to StarCare Health (illustrative example).",
+
+rahul:"Why can't I receive the medicine immediately?",
+
+priya:"Some medications require insurance approval before payment. The provider sends the request directly to the payer.",
+
+choices:[
+"Learn about the PA request",
+"Continue"
+]
+
+},
+
+{
+title:"What is Prior Authorization?",
+
+progress:37,
+
+doctor:"Educational Moment",
+
+rahul:"What exactly is Prior Authorization?",
+
+priya:"Prior Authorization helps insurers review medical necessity. According to the AMA 2023 PA Survey, Prior Authorization causes treatment delays in the majority of cases. Step therapy isn't just paperwork—for aggressive diseases, delays may worsen disease progression.",
+
+choices:[
+"Explain Step Therapy",
+"Continue"
+]
+
+},
+{
+title:"Insurance Review",
+
+progress:50,
+
+doctor:"StarCare Health begins reviewing the Prior Authorization request.",
+
+rahul:"What exactly is the insurance company checking?",
+
+priya:"The payer reviews four important things: eligibility, clinical documentation, ICD-10 diagnosis match, and step therapy history. Each helps determine whether the requested treatment meets coverage rules.",
+
+choices:[
+"Explain each review item",
+"Continue"
+]
+
+},
+
+{
+title:"Denial",
+
+progress:62,
+
+doctor:"Initial Review Completed",
+
+rahul:"Oh no! My request was denied.",
+
+priya:"The request was denied because step therapy documentation was missing. A denial is NOT permanent. Physician offices often spend more than two staff hours resolving each denial by collecting missing information.",
+
+choices:[
+"Learn how to appeal",
+"Continue"
+]
+
+},
+
+{
+title:"Appeal",
+
+progress:75,
+
+doctor:"Appeal Preparation",
+
+rahul:"Can we still get approval?",
+
+priya:"Yes. The provider gathers missing clinical records, prepares a Letter of Medical Necessity, and submits a formal appeal to StarCare Health for another review.",
+
+choices:[
+"What is a Letter of Medical Necessity?",
+"Continue"
+]
+
+},
+
+{
+title:"Approval",
+
+progress:87,
+
+doctor:"Appeal Review Completed",
+
+rahul:"Great news! Was it approved?",
+
+priya:"Yes! The Prior Authorization has been approved. A reference number is generated and the approval remains on file for Humira, so another PA is not needed for this approved treatment period.",
+
+choices:[
+"View approval details",
+"Continue"
+]
+
+},
+
+{
+title:"Takeaways",
+
+progress:100,
+
+doctor:"Journey Complete",
+
+rahul:"Now I understand how Prior Authorization works and why documentation matters.",
+
+priya:"Health systems also monitor denial rate, appeal rate, approval rate, and average resolution time to improve patient care and reduce delays.",
+
+choices:[
+"Finish Story",
+"Restart"
+]
+
+}
+
+];
+
+let currentScene=0;
+
+const chat=document.getElementById("chat");
+
+const choices=document.getElementById("choices");
+
+const progressBar=document.getElementById("progressBar");
+
+const progressLabel=document.getElementById("progressLabel");
+
+/* =====================
+
+Bubble Creator
+
+===================== */
+
+function createBubble(type,text){
+
+const bubble=document.createElement("div");
+
+if(type==="rahul"){
+
+bubble.className="chatBubble rahul";
+
+bubble.textContent="👦 Rahul\n\n"+text;
+
+}
+
+else if(type==="priya"){
+
+bubble.className="chatBubble priya";
+
+bubble.textContent="👧 Priya\n\n"+text;
+
+}
+
+else{
+
+bubble.className="centerText";
+
+bubble.textContent=text;
+
+}
+
+chat.appendChild(bubble);
+
+chat.scrollTop=chat.scrollHeight;
+
+}
+/* =====================
+
+Load Scene
+
+===================== */
+
+function loadScene(){
+
+choices.innerHTML="";
+
+const scene=scenes[currentScene];
+
+progressBar.style.width=scene.progress+"%";
+
+progressLabel.textContent=scene.progress+"% Complete";
+
+/* Doctor / Narrator */
+
+createBubble(
+"doctor",
+"📍 "+scene.title+"\n\n"+scene.doctor
+);
+
+/* Rahul */
+
+setTimeout(()=>{
+
+createBubble(
+"rahul",
+scene.rahul
+);
+
+},400);
+
+/* Priya */
+
+setTimeout(()=>{
+
+createBubble(
+"priya",
+scene.priya
+);
+
+},900);
+
+/* Buttons */
+
+setTimeout(()=>{
+
+const btn1=document.createElement("button");
+
+btn1.className="choiceBtn";
+
+btn1.textContent=scene.choices[0];
+
+btn1.onclick=function(){
+
+nextScene(scene.choices[0]);
+
+};
+
+choices.appendChild(btn1);
+
+const btn2=document.createElement("button");
+
+btn2.className="choiceBtn";
+
+btn2.textContent=scene.choices[1];
+
+btn2.onclick=function(){
+
+nextScene(scene.choices[1]);
+
+};
+
+choices.appendChild(btn2);
+
+},1500);
+
+}
+
+/* =====================
+
+Choice Handler
+
+===================== */
+
+function nextScene(choice){
+
+choices.innerHTML="";
+
+const reply=document.createElement("div");
+
+reply.className="chatBubble rahul";
+
+reply.textContent="👦 Rahul\n\nChoice: "+choice;
+
+chat.appendChild(reply);
+
+chat.scrollTop=chat.scrollHeight;
+
+setTimeout(()=>{
+
+if(currentScene<scenes.length-1){
+
+currentScene++;
+
+loadScene();
+
+}
+
+else{
+
+finishStory();
+
+}
+
+},900);
+
+}
+/* =====================
+
+Story Complete
+
+===================== */
+
+function finishStory(){
+
+choices.innerHTML="";
+
+createBubble(
+"doctor",
+"🎉 Prior Authorization Journey Completed"
+);
+
+setTimeout(()=>{
+
+createBubble(
+"priya",
+"Excellent! You have completed all 8 story chapters. You now understand how Prior Authorization works from both the patient and healthcare system perspectives."
+);
+
+},500);
+
+setTimeout(()=>{
+
+const summary=document.createElement("div");
+
+summary.className="chatBubble priya";
+
+summary.style.maxWidth="90%";
+
+summary.innerHTML=
+"<b>📚 Key Takeaways</b><br><br>"+
+"✅ Prior Authorization checks medical necessity before treatment.<br><br>"+
+"✅ Clinical documentation is critical for approval.<br><br>"+
+"✅ Missing information may lead to denial but appeals are available.<br><br>"+
+"✅ Providers submit supporting documents including the Letter of Medical Necessity.<br><br>"+
+"✅ Health systems monitor denial rates, appeal rates, approval rates, and resolution time to improve patient care.<br><br>"+
+"✅ StarCare Health in this simulator is an illustrative example used for education.";
+
+chat.appendChild(summary);
+
+chat.scrollTop=chat.scrollHeight;
+
+},1200);
+
+setTimeout(()=>{
+
+const end=document.createElement("div");
+
+end.className="centerText";
+
+end.textContent="🏆 Congratulations! You finished the Prior Authorization Story Simulator.";
+
+chat.appendChild(end);
+
+chat.scrollTop=chat.scrollHeight;
+
+},2000);
+
+}
+
+/* =====================
+
+Restart Story
+
+===================== */
+
+function restartStory(){
+
+currentScene=0;
+
+chat.innerHTML="";
+
+choices.innerHTML="";
+
+progressBar.style.width="0%";
+
+progressLabel.textContent="0% Complete";
+
+loadScene();
+
+}
+/* ======================================
+
+Application Initialization
+
+====================================== */
+
+window.onload = function () {
+
+    createBubble(
+        "doctor",
+        "🏥 Welcome to the Prior Authorization Story Simulator\n\nFollow Rahul's healthcare journey and learn how Prior Authorization works in simple language."
+    );
+
+    setTimeout(function () {
+        loadScene();
+    }, 1200);
+
+};
+
+/* ======================================
+
+Keyboard Shortcut
+
+====================================== */
+
+document.addEventListener("keydown", function(e){
+
+    if(e.key==="Enter"){
+
+        if(currentScene < scenes.length-1){
+
+            const btn = choices.querySelector("button");
+
+            if(btn){
+                btn.click();
+            }
+
+        }
+
+    }
+
+});
+
+/* ======================================
+
+Auto Scroll Helper
+
+====================================== */
+
+const observer = new MutationObserver(function(){
+
+    chat.scrollTop = chat.scrollHeight;
+
+});
+
+observer.observe(chat,{
+    childList:true
+});
+
+/* ======================================
+
+End of Application
+
+====================================== */
